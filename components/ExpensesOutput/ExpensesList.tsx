@@ -7,18 +7,25 @@ import {
   View,
 } from "react-native";
 import { IExpense } from "../../types";
+import ExpenseItem from "./ExpenseItem";
 interface IExpensesList {
   expenses: IExpense[];
 }
 const renderExpenseItem = ({ item }: ListRenderItemInfo<IExpense>) => {
-  return <Text>{item.description}</Text>;
+  return (
+    <ExpenseItem
+      amount={item.amount}
+      date={item.date}
+      description={item.description}
+    />
+  );
 };
 const ExpensesList: React.FC<IExpensesList> = ({ expenses }) => {
   return (
     <FlatList
       data={expenses}
       renderItem={renderExpenseItem}
-      keyExtractor={({ id }) => id}
+      keyExtractor={(item, i) => String(i)}
     />
   );
 };
