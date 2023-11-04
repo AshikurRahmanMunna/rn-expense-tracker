@@ -1,7 +1,13 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { DrawerScreenProps } from "@react-navigation/drawer";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
-export type RootStackParamList = {};
+import { CompositeScreenProps } from "@react-navigation/native";
+export type RootStackParamList = {
+  ExpensesOverview: undefined;
+  ManageExpense: {
+    expenseId: string;
+  };
+};
 
 // use this to get both the navigation and route
 export type CustomStackScreenProps<Screen extends keyof RootStackParamList> =
@@ -31,7 +37,10 @@ export type CustomDrawerRouteProp<Screen extends keyof RootDrawerParamsList> =
   CustomDrawerScreenProps<Screen>["route"];
 
 //   drawer
-export type RootBottomTabParamsList = {};
+export type RootBottomTabParamsList = {
+  RecentExpenses: undefined;
+  AllExpenses: undefined;
+};
 
 export type CustomBottomTabScreenProps<
   Screen extends keyof RootBottomTabParamsList

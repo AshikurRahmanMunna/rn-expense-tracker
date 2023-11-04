@@ -2,14 +2,26 @@ import moment from "moment";
 import React from "react";
 import { Pressable, Text, View, StyleSheet } from "react-native";
 import { GlobalStyles } from "../../constants/styles";
+import { useNavigation } from "@react-navigation/native";
 interface IExpenseItem {
   description: string;
   amount: number;
   date: Date;
+  id: string;
 }
-const ExpenseItem: React.FC<IExpenseItem> = ({ amount, date, description }) => {
+const ExpenseItem: React.FC<IExpenseItem> = ({ amount, date, description, id }) => {
+  const navigation = useNavigation();
+  const handleExpensePress = () => {
+    // @ts-ignore
+    navigation.navigate("ManageExpense", {
+      expenseId: id
+    });
+  };
   return (
-    <Pressable>
+    <Pressable
+      onPress={handleExpensePress}
+      style={({ pressed }) => pressed && styles.pressed}
+    >
       <View style={styles.expenseItem}>
         <View>
           <Text style={[styles.textBase, styles.description]}>
@@ -20,7 +32,7 @@ const ExpenseItem: React.FC<IExpenseItem> = ({ amount, date, description }) => {
           </Text>
         </View>
         <View style={styles.amountContainer}>
-          <Text style={styles.amount}>{amount}</Text>
+          <Text style={styles.amount}>{amount.toFixed(2)}</Text>
         </View>
       </View>
     </Pressable>
@@ -30,6 +42,9 @@ const ExpenseItem: React.FC<IExpenseItem> = ({ amount, date, description }) => {
 export default ExpenseItem;
 
 const styles = StyleSheet.create({
+  pressed: {
+    opacity: 0.75,
+  },
   expenseItem: {
     padding: 12,
     marginVertical: 8,
@@ -57,6 +72,8 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     justifyContent: "center",
     alignItems: "center",
+    borderRadius: 4,
+    minWidth: 80,
   },
   amount: {
     color: GlobalStyles.colors.primary500,

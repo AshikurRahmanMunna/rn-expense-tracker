@@ -17,6 +17,7 @@ const renderExpenseItem = ({ item }: ListRenderItemInfo<IExpense>) => {
       amount={item.amount}
       date={item.date}
       description={item.description}
+      id={item.id}
     />
   );
 };
