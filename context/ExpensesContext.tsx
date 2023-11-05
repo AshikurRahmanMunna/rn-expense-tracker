@@ -59,8 +59,9 @@ const expenseReducer = (state: IExpense[], action: ExpenseAction) => {
       }
       const updatableExpense = state[expenseIndex];
       const updatedItem = { ...updatableExpense, ...data };
-      state[expenseIndex] = updatedItem;
-      return state;
+      const updatedState = [...state];
+      updatedState[expenseIndex] = updatedItem;
+      return updatedState;
     default:
       return state;
   }
