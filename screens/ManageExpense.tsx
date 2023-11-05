@@ -9,6 +9,7 @@ import { GlobalStyles } from "../constants/styles";
 import { ExpensesContext } from "../context/ExpensesContext";
 import ExpenseForm from "../components/ManageExpense/ExpenseForm";
 import { IExpensePayload } from "../types";
+import { createExpense, deleteExpense, updateExpense } from "../util/http";
 interface IManageExpense {
   route: CustomStackRouteProp<"ManageExpense">;
   navigation: CustomStackNavigationProp<"ManageExpense">;
@@ -16,8 +17,12 @@ interface IManageExpense {
 const ManageExpense: React.FC<IManageExpense> = ({ route, navigation }) => {
   const editedExpenseId = route.params?.expenseId;
   const isEditing = !!editedExpenseId;
-  const { deleteExpense, addExpense, updateExpense, expenses } =
-    useContext(ExpensesContext);
+  const {
+    deleteExpense: deleteExpenseContext,
+    addExpense,
+    updateExpense: updateExpenseContext,
+    expenses,
+  } = useContext(ExpensesContext);
   const editingExpense = expenses.find(
     (expense) => expense.id === editedExpenseId
   );
@@ -28,8 +33,9 @@ const ManageExpense: React.FC<IManageExpense> = ({ route, navigation }) => {
     });
   }, [navigation, isEditing]);
 
-  const handleDeleteExpense = () => {
-    deleteExpense(editedExpenseId);
+  const handleDeleteExpense = async () => {
+    deleteExpenseContext(editedExpenseId);
+    await deleteExpense(editedExpenseId);
     navigation.goBack();
   };
 
@@ -37,11 +43,13 @@ const ManageExpense: React.FC<IManageExpense> = ({ route, navigation }) => {
     navigation.goBack();
   };
 
-  const handleConfirm = (data: IExpensePayload) => {
+  const handleConfirm = async (data: IExpensePayload) => {
     if (isEditing) {
-      updateExpense(editedExpenseId, data);
+      updateExpenseContext(editedExpenseId, data);
+      await updateExpense(editedExpenseId, data);
     } else {
-      addExpense(data);
+      const id = await createExpense(data);
+      addExpense({ ...data, id });
     }
     navigation.goBack();
   };

@@ -1,17 +1,18 @@
 import React, { createContext, useReducer } from "react";
 import { IExpense, IExpensePayload } from "../types";
-import { DUMMY_EXPENSES } from "../data/expenses";
 interface IExpenseContextProvider {
   children: React.ReactNode;
 }
 interface IExpensesContext {
   expenses: IExpense[];
-  addExpense: (payload: IExpensePayload) => void;
+  setExpenses: (payload: IExpense[]) => void;
+  addExpense: (payload: IExpense) => void;
   deleteExpense: (id: string) => void;
   updateExpense: (id: string, payload: IExpensePayload) => void;
 }
 export const ExpensesContext = createContext<IExpensesContext>({
   expenses: [],
+  setExpenses: () => {},
   addExpense: () => {},
   deleteExpense: () => {},
   updateExpense: () => {},
@@ -19,7 +20,12 @@ export const ExpensesContext = createContext<IExpensesContext>({
 
 type AddAction = {
   type: "ADD";
-  payload: IExpensePayload;
+  payload: IExpense;
+};
+
+type SetAction = {
+  type: "SET";
+  payload: IExpense[];
 };
 
 type DeleteAction = {
@@ -35,13 +41,14 @@ type UpdateAction = {
   };
 };
 
-type ExpenseAction = AddAction | DeleteAction | UpdateAction;
+type ExpenseAction = AddAction | SetAction | DeleteAction | UpdateAction;
 
 const expenseReducer = (state: IExpense[], action: ExpenseAction) => {
   switch (action.type) {
     case "ADD":
-      const _id = new Date().toString() + Math.random().toString();
-      return [{ ...action.payload, id: _id }, ...state];
+      return [action.payload, ...state];
+    case "SET":
+      return action.payload.reverse();
     case "DELETE":
       return state.filter((expense) => expense.id !== action.payload);
     case "UPDATE":
@@ -62,9 +69,12 @@ const expenseReducer = (state: IExpense[], action: ExpenseAction) => {
 const ExpenseContextProvider: React.FC<IExpenseContextProvider> = ({
   children,
 }) => {
-  const [state, dispatch] = useReducer(expenseReducer, DUMMY_EXPENSES);
-  const addExpense = (expenseData: IExpensePayload) => {
+  const [state, dispatch] = useReducer(expenseReducer, []);
+  const addExpense = (expenseData: IExpense) => {
     dispatch({ type: "ADD", payload: expenseData });
+  };
+  const setExpenses = (expenses: IExpense[]) => {
+    dispatch({ type: "SET", payload: expenses });
   };
   const deleteExpense = (id: string) => {
     dispatch({ type: "DELETE", payload: id });
@@ -74,6 +84,7 @@ const ExpenseContextProvider: React.FC<IExpenseContextProvider> = ({
   };
   const contextValue: IExpensesContext = {
     addExpense,
+    setExpenses,
     deleteExpense,
     expenses: state,
     updateExpense,
