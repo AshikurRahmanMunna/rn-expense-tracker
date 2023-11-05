@@ -1,14 +1,14 @@
 import React, { useContext, useLayoutEffect } from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Text } from "react-native";
 import {
   CustomStackNavigationProp,
   CustomStackRouteProp,
 } from "../types/navigation";
-import { DUMMY_EXPENSES } from "../data/expenses";
 import IconButton from "../components/UI/IconButton";
 import { GlobalStyles } from "../constants/styles";
-import Button from "../components/UI/Button";
 import { ExpensesContext } from "../context/ExpensesContext";
+import ExpenseForm from "../components/ManageExpense/ExpenseForm";
+import { IExpensePayload } from "../types";
 interface IManageExpense {
   route: CustomStackRouteProp<"ManageExpense">;
   navigation: CustomStackNavigationProp<"ManageExpense">;
@@ -16,47 +16,52 @@ interface IManageExpense {
 const ManageExpense: React.FC<IManageExpense> = ({ route, navigation }) => {
   const editedExpenseId = route.params?.expenseId;
   const isEditing = !!editedExpenseId;
-  const { deleteExpense, addExpense, updateExpense } =
+  const { deleteExpense, addExpense, updateExpense, expenses } =
     useContext(ExpensesContext);
+  const editingExpense = expenses.find(
+    (expense) => expense.id === editedExpenseId
+  );
+
   useLayoutEffect(() => {
     navigation.setOptions({
       title: isEditing ? "Edit Expense" : "Add Expense",
     });
   }, [navigation, isEditing]);
+
   const handleDeleteExpense = () => {
     deleteExpense(editedExpenseId);
     navigation.goBack();
   };
+
   const handleCancel = () => {
     navigation.goBack();
   };
-  const handleConfirm = () => {
+
+  const handleConfirm = (data: IExpensePayload) => {
     if (isEditing) {
-      updateExpense(editedExpenseId, {
-        description: "Test",
-        amount: 19.99,
-        date: new Date(),
-      });
+      updateExpense(editedExpenseId, data);
     } else {
-      addExpense({
-        description: "Test",
-        amount: 19.99,
-        date: new Date(),
-      });
+      addExpense(data);
     }
     navigation.goBack();
   };
+  if (isEditing && !editingExpense) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.notFound}>Expense not found</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      <View style={styles.buttons}>
-        <Button style={styles.button} mode="flat" onPress={handleCancel}>
-          Cancel
-        </Button>
-        <Button style={styles.button} onPress={handleConfirm}>
-          {isEditing ? "Update" : "Add"}
-        </Button>
-      </View>
-      {isEditing && (
+      <ExpenseForm
+        onCancel={handleCancel}
+        onSubmit={handleConfirm}
+        editing={isEditing}
+        editingExpense={editingExpense}
+      />
+      {isEditing && editedExpenseId && (
         <View style={styles.deleteContainer}>
           <IconButton
             color={GlobalStyles.colors.error500}
@@ -78,13 +83,12 @@ const styles = StyleSheet.create({
     padding: 24,
     backgroundColor: GlobalStyles.colors.primary800,
   },
-  buttons: {
-    flexDirection: "row",
-    justifyContent: "center",
-  },
-  button: {
-    minWidth: 120,
-    marginHorizontal: 8,
+  notFound: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "white",
+    textAlign: "center",
+    marginBottom: 8,
   },
   deleteContainer: {
     marginTop: 16,
