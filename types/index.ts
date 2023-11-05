@@ -4,3 +4,8 @@ export interface IExpense {
   date: Date;
   amount: number;
 }
+export interface IExpensePayload {
+  description: string;
+  date: Date;
+  amount: number;
+}
